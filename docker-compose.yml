@@ -1,0 +1,39 @@
+version: "3"
+
+services:
+  db:
+    image: mysql/mysql-server
+    container_name: gocha-db
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD: password
+      - MYSQL_DATABASE: gocha
+      - MYSQL_USER: mysql
+      - MYSQL_PASSWORD: mysql
+      - MYSQL_ALLOW_EMPTY_PASSWORD: yes
+
+  cache:
+    image: redis
+    container_name: gocha-redis
+    ports:
+      - 6379:6379
+
+  web:
+    build: .
+    container_name: gocha-server
+    depends_on:
+      - cache
+    ports:
+      - 8080:8080
+
+    restart: on-failure
+
+  subscribe:
+    build: .
+    container_name: gocha-subscriber
+    depends_on:
+      - db
+      - cache
+    command: ["subscribe"]
+
